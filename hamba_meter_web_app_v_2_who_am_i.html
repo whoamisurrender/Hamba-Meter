@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Who Am I — Hamba Meter (v2)</title>
+  <meta name="theme-color" content="#1F2C4C" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --brand:#1F2C4C; /* WHO AM I dark navy */
+      --text:#0b1222;
+      --muted:#6b7280;
+      --bg:#ffffff;
+      --border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .header{position:sticky;top:0;z-index:1000;background:linear-gradient(180deg,#fff 85%,rgba(255,255,255,.92));border-bottom:1px solid var(--border)}
+    .head-inner{max-width:980px;margin:0 auto;padding:14px 16px}
+    .title{font-family:Montserrat,Poppins,system-ui;font-weight:800;color:var(--brand);letter-spacing:.2px}
+    .tagline{font-size:12px;color:var(--muted)}
+
+    .container{max-width:980px;margin:0 auto;padding:16px}
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;background:#f3f4f6;border-radius:12px;padding:6px;width:max-content}
+    .tab-btn{padding:8px 14px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;font-weight:600;color:var(--brand)}
+    .tab-btn.active{background:#fff;border-color:var(--border);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+    .section{display:none}
+    .section.active{display:block}
+
+    .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0}
+    select,button{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:600}
+    button.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .progress{width:100%;height:10px;border-radius:999px;background:#f1f5f9;overflow:hidden;border:1px solid #e2e8f0}
+    .progress>div{height:100%;background:var(--brand);width:0%}
+
+    /* Desktop table */
+    .table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;background:#fff}
+    table{border-collapse:separate;border-spacing:0;min-width:900px}
+    th,td{border-bottom:1px solid var(--border);padding:10px 12px;white-space:nowrap;background:#fff}
+    th{position:sticky;top:0;background:#fff;z-index:5;text-align:left}
+    thead th:first-child,tbody td:first-child{position:sticky;left:0;background:#fff;z-index:6;max-width:360px;white-space:normal}
+    tbody td:first-child{font-weight:600}
+    thead th:first-child{z-index:8}
+    thead th{font-size:13px}
+    tbody tr:last-child td{border-bottom:none}
+
+    /* Ensure checkboxes visible across browsers */
+    input[type="checkbox"].check{width:22px;height:22px;cursor:pointer;appearance:auto;-webkit-appearance:auto;accent-color:var(--brand)}
+
+    /* Month separators: garis pembatas tiap bulan */
+    #monthlyTable th:nth-child(n+2),#monthlyTable td:nth-child(n+2){border-left:1px solid var(--border)}
+    /* Garis lebih tegas setiap kuartal (Apr, Jul, Okt) */
+    #monthlyTable th:nth-child(5),#monthlyTable td:nth-child(5),
+    #monthlyTable th:nth-child(8),#monthlyTable td:nth-child(8),
+    #monthlyTable th:nth-child(11),#monthlyTable td:nth-child(11){border-left:2px solid #cbd5e1}
+
+    .helper{font-size:12px;color:var(--muted);margin:10px 2px 0}
+
+    /* Annual list */
+    .list{display:grid;grid-template-columns:1fr auto;align-items:center;gap:14px 10px;border:1px solid var(--border);border-radius:12px;background:#fff;padding:12px}
+    .list .row{display:contents}
+    .list label{font-weight:600}
+    .list input[type="checkbox"]{width:24px;height:24px;accent-color:var(--brand)}
+
+    /* Mobile cards */
+    @media (max-width:700px){
+      .table-wrap{display:none}
+      .mobile-list{display:grid;gap:12px}
+      .card{border:1px solid var(--border);border-radius:12px;background:#fff;padding:12px}
+      .card h4{margin:0 0 8px 0;font-size:15px}
+      .month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:6px}
+      .month-pill{display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;padding:6px 0;font-size:12px;gap:6px;background:#fff}
+      .month-pill input{width:18px;height:18px;accent-color:var(--brand)}
+    }
+    @media (min-width:701px){.mobile-list{display:none}}
+
+    .footer{text-align:center;color:var(--muted);font-size:12px;margin:24px 0 40px}
+    .small{font-size:12px;color:var(--muted)}
+
+    /* Error banner */
+    .err{display:none;margin:12px 0;padding:10px 12px;border:1px solid #fecaca;background:#fee2e2;color:#7f1d1d;border-radius:10px}
+    .err.show{display:block}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="head-inner">
+      <div class="title">Who Am I — Hamba Meter</div>
+      <div class="tagline">Bangga menjadi hamba-Nya • Checklist inti tanpa poin</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="tabs" role="tablist" aria-label="Pilih mode checklist">
+      <button class="tab-btn active" data-tab="monthly" role="tab" aria-selected="true">Bulanan (Inti)</button>
+      <button class="tab-btn" data-tab="annual" role="tab" aria-selected="false">Tahunan</button>
+    </div>
+
+    <div id="err" class="err">Gagal memuat checklist. Coba refresh. Jika masih gagal, kirimkan screenshot & buka dari browser (bukan in-app).</div>
+
+    <!-- MONTHLY SECTION -->
+    <section id="monthly" class="section active" aria-labelledby="tab-monthly">
+      <div class="controls">
+        <div>
+          <label class="small" for="monthSel">Progress bulan:</label>
+          <select id="monthSel" aria-label="Pilih bulan"></select>
+        </div>
+        <div class="progress" style="flex:1 1 240px"><div id="bar"></div></div>
+        <div id="progressText" class="small" aria-live="polite"></div>
+        <button id="resetMonth" title="Reset checklist bulan ini">Reset bulan ini</button>
+        <button id="exportBtn" class="primary" title="Unduh data">Export</button>
+        <label for="importFile" class="tab-btn" style="cursor:pointer;padding:10px 12px;margin-left:-4px">Import</label>
+        <input id="importFile" type="file" accept="application/json" style="display:none" />
+      </div>
+
+      <!-- DESKTOP TABLE -->
+      <div class="table-wrap" id="tableWrap">
+        <table id="monthlyTable">
+          <thead>
+            <tr>
+              <th>Checklist Inti (ceklis bila istiqamah)</th>
+              <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>Mei</th><th>Jun</th>
+              <th>Jul</th><th>Agu</th><th>Sep</th><th>Okt</th><th>Nov</th><th>Des</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE CARDS -->
+      <div class="mobile-list" id="mobileList"></div>
+      <p class="helper">Tip: geser tabel ke kanan/kiri untuk melihat semua bulan. Kolom pertama & header menempel (tidak menutupi konten). Di HP, tampilan otomatis jadi kartu bulan.</p>
+    </section>
+
+    <!-- ANNUAL SECTION -->
+    <section id="annual" class="section" aria-labelledby="tab-annual">
+      <div class="list" id="annualList"></div>
+      <div class="helper">Checklist tahunan: centang sekali saat ditunaikan di tahun ini.</div>
+      <button id="resetAnnual" style="margin-top:10px">Reset checklist tahunan</button>
+    </section>
+
+    <div class="footer">WHO AM I • Dark & clean • Ikhlas & istiqamah</div>
+  </main>
+
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    try{
+      const MONTHS = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+      const ITEMS = [
+        "Niat ikhlas dalam setiap amal (istiqamah)",
+        "Dzikir pagi–petang terjaga",
+        "Istighfar & taubat rutin",
+        "Husnuzan & tawakkal saat diuji",
+        "Shalat 5 waktu tepat waktu",
+        "Shalat berjamaah (ikhwan) terjaga",
+        "Rawatib 12 rakaat berjalan",
+        "Witir / Qiyamul-lail rutin",
+        "Tilawah harian (≥1 halaman) konsisten",
+        "Tadabbur ayat berjalan",
+        "Belajar ilmu & diamalkan",
+        "Jujur & amanah",
+        "Menjaga lisan (tanpa ghibah/dusta)",
+        "Birrul walidain & silaturahim",
+        "Menundukkan pandangan & menjaga aurat / adab digital",
+        "Sedekah rutin (uang/tenaga/ilmu)",
+        "Bantu orang lain & islah/memaafkan",
+        "Audit kabair: bebas dari riba/zina/khamr–judi/durhaka/dzalim (taubat bila tergelincir)"
+      ];
+      const YEAR_ITEMS = [
+        "Ramadan: puasa tuntas (sesuai ketentuan)",
+        "Ramadan: tarawih/tahajjud & i‘tikaf 10 malam terakhir",
+        "Zakat fitrah ditunaikan",
+        "Dzulhijjah: puasa Arafah (non-haji)",
+        "Qurban (bila mampu)",
+        "Zakat mal (jika nishab)",
+        "Khatam Qur’an ≥1×/tahun",
+        "Qadha puasa tahun lalu tuntas (jika ada)",
+        "Audit keuangan: bebas riba",
+        "Perbarui wasiat & proyek sedekah jariyah"
+      ];
+
+      const KEY = 'wmi_hamba_meter_v2';
+      let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {
+        monthly: Array.from({length: ITEMS.length}, () => Array(12).fill(false)),
+        annual: Array(YEAR_ITEMS.length).fill(false)
+      };
+      const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+
+      // Render monthly table
+      const tbody = document.querySelector('#monthlyTable tbody');
+      ITEMS.forEach((label, i) => {
+        const tr = document.createElement('tr');
+        const td0 = document.createElement('td');
+        td0.textContent = label; tr.appendChild(td0);
+        MONTHS.forEach((m, j) => {
+          const td = document.createElement('td');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox'; cb.className = 'check';
+          cb.checked = !!state.monthly[i][j];
+          cb.addEventListener('change', () => { state.monthly[i][j] = cb.checked; save(); updateProgress(); syncMobile(i,j,cb.checked); });
+          td.appendChild(cb); tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      // Mobile cards
+      const mobileList = document.getElementById('mobileList');
+      ITEMS.forEach((label, i) => {
+        const el = document.createElement('div'); el.className = 'card';
+        const h4 = document.createElement('h4'); h4.textContent = label; el.appendChild(h4);
+        const grid = document.createElement('div'); grid.className = 'month-grid';
+        MONTHS.forEach((m, j) => {
+          const pill = document.createElement('label'); pill.className = 'month-pill';
+          const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!state.monthly[i][j];
+          cb.addEventListener('change', () => { state.monthly[i][j] = cb.checked; save(); updateProgress(); syncDesktop(i,j,cb.checked); });
+          const span = document.createElement('span'); span.textContent = m;
+          pill.appendChild(cb); pill.appendChild(span); grid.appendChild(pill);
+        });
+        el.appendChild(grid); mobileList.appendChild(el);
+      });
+
+      function syncMobile(i,j,val){
+        const card = mobileList.children[i];
+        const pillCb = card.querySelectorAll('input[type=checkbox]')[j];
+        if (pillCb) pillCb.checked = val;
+      }
+      function syncDesktop(i,j,val){
+        const row = tbody.children[i];
+        const cellCb = row.querySelectorAll('input[type=checkbox]')[j];
+        if (cellCb) cellCb.checked = val;
+      }
+
+      // Annual list
+      const annualList = document.getElementById('annualList');
+      YEAR_ITEMS.forEach((label, idx) => {
+        const row = document.createElement('div'); row.className='row';
+        const lab = document.createElement('label'); lab.textContent = label;
+        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!state.annual[idx];
+        cb.addEventListener('change', () => { state.annual[idx] = cb.checked; save(); });
+        row.appendChild(lab); row.appendChild(cb); annualList.appendChild(row);
+      });
+
+      // Tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+          btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+          document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+          document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+      });
+
+      // Progress
+      const monthSel = document.getElementById('monthSel');
+      MONTHS.forEach((m,i)=>{ const opt=document.createElement('option'); opt.value=i; opt.textContent=m; monthSel.appendChild(opt); });
+      monthSel.value = new Date().getMonth();
+      const bar = document.getElementById('bar');
+      const progressText = document.getElementById('progressText');
+      function updateProgress(){
+        const m = parseInt(monthSel.value,10);
+        const total = ITEMS.length;
+        const done = state.monthly.reduce((acc,row)=> acc + (row[m]?1:0), 0);
+        const pct = Math.round((done/total)*100);
+        bar.style.width = pct + '%';
+        progressText.textContent = MONTHS[m] + ": " + done + "/" + total + " (" + pct + "%)";
+      }
+      monthSel.addEventListener('change', updateProgress);
+      updateProgress();
+
+      // Reset
+      document.getElementById('resetMonth').addEventListener('click', () => {
+        const m = parseInt(monthSel.value,10);
+        if(!confirm('Reset checklist bulan ' + MONTHS[m] + '?')) return;
+        state.monthly.forEach(row => row[m] = false); save();
+        document.querySelectorAll('#monthlyTable tbody input[type=checkbox]').forEach((cb,idx)=>{ if(idx % 12 === m) cb.checked=false; });
+        mobileList.querySelectorAll('.card').forEach(card=>{ const cbs = card.querySelectorAll('input[type=checkbox]'); if (cbs[m]) cbs[m].checked=false; });
+        updateProgress();
+      });
+      document.getElementById('resetAnnual').addEventListener('click', () => {
+        if(!confirm('Reset seluruh checklist tahunan?')) return;
+        state.annual = state.annual.map(()=>false); save();
+        annualList.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked=false);
+      });
+
+      // Export / Import (robust for iOS & in-app browsers)
+      document.getElementById('exportBtn').addEventListener('click', async () => {
+        const text = JSON.stringify(state);
+        const filename = 'hamba_meter_' + new Date().toISOString().slice(0,10) + '.json';
+        try{
+          if (navigator.canShare && window.File) {
+            const file = new File([text], filename, {type:'application/json'});
+            if (navigator.canShare({files:[file]})) { await navigator.share({files:[file], title:'Hamba Meter', text:'Data export'}); return; }
+          }
+          const blob = new Blob([text], {type:'application/json'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = filename; a.rel='noopener';
+          document.body.appendChild(a); a.click(); setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); },0);
+        }catch(err){ /* ignore */ }
+        const dataUrl = 'data:application/json;charset=utf-8,' + encodeURIComponent(text);
+        const w = window.open(dataUrl, '_blank');
+        if(!w){ try{ await navigator.clipboard.writeText(text); alert('Data tersalin ke clipboard. Tempel ke catatan untuk menyimpan.'); } catch(e){ prompt('Salin data berikut lalu simpan sebagai .json:', text); } }
+      });
+      document.getElementById('importFile').addEventListener('change', (e) => {
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try{
+            const data = JSON.parse(reader.result);
+            if(data.monthly && data.annual){ localStorage.setItem(KEY, JSON.stringify(data)); location.reload(); }
+            else alert('File tidak valid');
+          }catch(err){ alert('File tidak valid'); }
+        };
+        reader.readAsText(file);
+      });
+
+      // iOS repaint helper
+      document.getElementById('tableWrap').addEventListener('scroll',()=>{}, {passive:true});
+
+    }catch(e){
+      const err = document.getElementById('err'); err.classList.add('show');
+      console.error(e);
+    }
+  });
+  </script>
+</body>
+</html>
