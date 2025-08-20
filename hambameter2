@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hamba Meter - Pilihan Ganda</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      font-size: 28px;
+      color: #333;
+    }
+    .question {
+      margin-bottom: 20px;
+      font-size: 18px;
+      text-align: left;
+    }
+    .choices {
+      margin: 10px 0;
+      text-align: left;
+    }
+    .choices label {
+      display: block;
+      padding: 10px;
+      background-color: #eee;
+      margin: 5px 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .choices input {
+      margin-right: 10px;
+    }
+    .result {
+      font-size: 24px;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #000;
+    }
+    .gold-text {
+      color: gold;
+    }
+    .progress-bar {
+      margin-top: 30px;
+      height: 10px;
+      background-color: #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    .progress {
+      height: 100%;
+      background-color: #4caf50;
+      width: 0;
+      transition: width 0.5s;
+    }
+    button {
+      padding: 12px 24px;
+      background-color: #4caf50;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hamba Meter</h1>
+    <p>Jawab pertanyaan berikut untuk mengetahui responsmu!</p>
+
+    <div id="question-container">
+      <!-- Questions will be dynamically added here -->
+    </div>
+
+    <div class="progress-bar">
+      <div id="progress" class="progress"></div>
+    </div>
+
+    <button id="next-btn">Next</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "Saat mendengar gosip buruk tentang diri sendiri, bagaimana cara respon kamu?",
+        answers: [
+          { text: "Aku bersyukur, berdoa agar diberi kekuatan, dan mendoakan orang yang menyebarkan gosip agar diberi petunjuk.", points: 90 },
+          { text: "Aku merasa kesal, tetapi berusaha untuk tidak memikirkan terlalu dalam.", points: 50 },
+          { text: "Aku merasa marah dan membalas gosip itu dengan lebih buruk.", points: 30 },
+          { text: "Aku mencoba untuk tetap tenang dan membuktikan dengan tindakan baik bahwa gosip itu tidak benar.", points: 80 }
+        ]
+      },
+      {
+        question: "Jika kamu ditabrak orang di jalan, tetapi justru orang tersebut yang marah, bagaimana cara responmu?",
+        answers: [
+          { text: "Aku tetap sabar, bersyukur, dan berharap orang tersebut mendapatkan ketenangan hati.", points: 90 },
+          { text: "Aku merasa bingung, tetapi aku mencoba untuk tetap tenang dan menenangkan diri.", points: 50 },
+          { text: "Aku merasa marah dan melawan orang tersebut, membuat situasi semakin buruk.", points: 30 },
+          { text: "Aku meminta maaf, bahkan jika bukan salahku, dan mencoba untuk menenangkan situasi.", points: 80 }
+        ]
+      },
+      {
+        question: "Bagaimana responmu jika rencana yang kamu impikan ternyata berhasil?",
+        answers: [
+          { text: "Aku merasa bangga diri, bahkan bisa merendahkan orang yang tidak berhasil.", points: 30 },
+          { text: "Aku merasa senang, tetapi tetap rendah hati dan melanjutkan ke rencana berikutnya.", points: 50 },
+          { text: "Aku merasa bersyukur dan berterima kasih kepada Allah, serta berusaha memberikan dampak positif bagi orang lain.", points: 80 },
+          { text: "Aku merasa bersyukur, dan bertekad untuk membantu orang lain mencapai impian mereka juga.", points: 90 }
+        ]
+      },
+      {
+        question: "Apa yang kamu lakukan jika kamu susah untuk tidur?",
+        answers: [
+          { text: "Aku merenung sejenak, bersyukur atas hari yang telah aku jalani, dan berdoa agar diberikan ketenangan dalam tidur.", points: 90 },
+          { text: "Aku merasa frustasi dan semakin terjaga, menghabiskan waktu dengan berpikir negatif.", points: 30 },
+          { text: "Aku mencoba untuk tidur kembali dan berusaha tidak memikirkan masalah yang mengganggu.", points: 50 },
+          { text: "Aku mengambil napas dalam-dalam, berdoa, dan mencoba relaksasi untuk tidur dengan tenang.", points: 80 }
+        ]
+      },
+      {
+        question: "Jika barang berharga milikmu hilang, bagaimana cara respon mu?",
+        answers: [
+          { text: "Aku merasa sedih, tetapi berusaha menerima kenyataan dan mencoba mencari solusi.", points: 50 },
+          { text: "Aku merasa bersyukur atas apa yang masih ada dan berusaha belajar dari kejadian ini.", points: 80 },
+          { text: "Aku merasa marah, kecewa, dan mulai menyalahkan orang lain.", points: 30 },
+          { text: "Aku bersyukur, berdoa agar barang itu kembali, dan percaya bahwa ini adalah ujian untuk menguatkan diri.", points: 90 }
+        ]
+      },
+      {
+        question: "Saat kamu sudah berdoa sepenuh hati namun masih belum dikabulkan, apa yang kamu rasakan?",
+        answers: [
+          { text: "Aku merasa bersyukur, percaya bahwa doa itu akan dikabulkan sesuai dengan waktu terbaik yang Allah tentukan.", points: 90 },
+          { text: "Aku merasa sedih, tetapi meyakini bahwa Allah lebih tahu apa yang terbaik untukku.", points: 50 },
+          { text: "Aku tetap bersabar dan yakin bahwa Allah akan memberikan yang terbaik pada waktu yang tepat.", points: 80 },
+          { text: "Aku merasa kecewa dan mulai meragukan doa serta takdirku.", points: 30 }
+        ]
+      },
+      {
+        question: "Apa yang kamu rasakan jika kamu telat melakukan Sholat?",
+        answers: [
+          { text: "Aku merasa kecewa dengan diriku sendiri dan mulai merasa malas untuk melakukannya.", points: 30 },
+          { text: "Aku merasa sedikit bersalah, tetapi berusaha untuk melaksanakan sholat segera.", points: 50 },
+          { text: "Aku merasa kecewa, tetapi segera berusaha memperbaikinya dengan melakukan sholat dengan khusyuk.", points: 80 },
+          { text: "Aku merasa bersyukur karena diberi kesempatan untuk bertaubat dan memperbaiki kekurangan.", points: 90 }
+        ]
+      },
+      {
+        question: "Saat dijalan kamu melihat seorang pemulung yang terlihat kelaparan, dan kamu hanya memiliki satu nasi bungkus, apa yang kamu lakukan?",
+        answers: [
+          { text: "Aku merasa kasihan, tetapi lebih memilih untuk mengabaikannya dan melanjutkan perjalanan.", points: 30 },
+          { text: "Aku merasa kasihan dan memberinya nasi bungkus dengan perasaan biasa saja.", points: 50 },
+          { text: "Aku memberinya nasi bungkus, dan berusaha untuk membantu dengan lebih banyak lagi jika aku bisa.", points: 80 },
+          { text: "Aku merasa bersyukur atas kesempatan untuk membantu, dan berdoa agar dia diberi rezeki yang lebih baik.", points: 90 }
+        ]
+      },
+      {
+        question: "Kamu melihat temanmu memiliki hal yang kamu selalu impikan, bagaimana perasaanmu?",
+        answers: [
+          { text: "Aku merasa iri dan cemburu, bahkan berpikir untuk merendahkan teman tersebut.", points: 30 },
+          { text: "Aku merasa senang untuk teman tersebut, meskipun sedikit kecewa karena belum mencapainya.", points: 50 },
+          { text: "Aku merasa senang dan termotivasi untuk mencapai impian yang sama.", points: 80 },
+          { text: "Aku merasa bahagia untuk teman tersebut dan berdoa agar aku juga diberikan yang lebih baik.", points: 90 }
+        ]
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let totalPoints = 0;
+
+    function renderQuestion() {
+      const questionData = questions[currentQuestionIndex];
+      const questionContainer = document.getElementById('question-container');
+      questionContainer.innerHTML = `
+        <div class="question">${questionData.question}</div>
+        <div class="choices">
+          ${shuffle(questionData.answers).map(answer => `
+            <label>
+              <input type="radio" name="answer" value="${answer.points}">
+              ${answer.text}
+            </label>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('progress').style.width = `${(currentQuestionIndex / questions.length) * 100}%`;
+      document.getElementById('next-btn').disabled = true;
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+      const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+      if (selectedAnswer) {
+        totalPoints += parseInt(selectedAnswer.value);
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+          renderQuestion();
+        } else {
+          showResult();
+        }
+      }
+    });
+
+    function showResult() {
+      let resultText = '';
+      let resultColor = '#000';
+      const percentage = (totalPoints / (questions.length * 90)) * 100;
+
+      if (percentage <= 30) {
+        resultText = 'Responmu Buruk';
+      } else if (percentage <= 50) {
+        resultText = 'Responmu Normal';
+      } else if (percentage <= 80) {
+        resultText = 'Responmu Hebat';
+      } else {
+        resultText = 'Responmu Ajaib';
+        resultColor = 'gold';
+      }
+
+      document.getElementById('result').innerHTML = `<span class="gold-text" style="color: ${resultColor}">${resultText}</span>`;
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>
